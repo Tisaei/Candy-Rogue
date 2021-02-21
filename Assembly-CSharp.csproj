@@ -64,9 +64,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\ActorController.cs" />
+    <Compile Include="Assets\Scripts\CandyRogueBase.cs" />
+    <Compile Include="Assets\Scripts\DataController.cs" />
     <Compile Include="Assets\Scripts\EnemyController.cs" />
     <Compile Include="Assets\Scripts\PixelObjectBase.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\TilemapController.cs" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.20f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
@@ -613,6 +616,9 @@
     <Reference Include="Unity.2D.SpriteShape.Editor">
       <HintPath>C:/Users/q8m90/Dropbox/GameCreate/Unity/Candy-Rogue/Library/ScriptAssemblies/Unity.2D.SpriteShape.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.2D.Tilemap.Extras.Editor">
+      <HintPath>C:/Users/q8m90/Dropbox/GameCreate/Unity/Candy-Rogue/Library/ScriptAssemblies/Unity.2D.Tilemap.Extras.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/q8m90/Dropbox/GameCreate/Unity/Candy-Rogue/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
@@ -672,6 +678,9 @@
     </Reference>
     <Reference Include="Unity.2D.Animation.Editor">
       <HintPath>C:/Users/q8m90/Dropbox/GameCreate/Unity/Candy-Rogue/Library/ScriptAssemblies/Unity.2D.Animation.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.2D.Tilemap.Extras">
+      <HintPath>C:/Users/q8m90/Dropbox/GameCreate/Unity/Candy-Rogue/Library/ScriptAssemblies/Unity.2D.Tilemap.Extras.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Mathematics.Editor">
       <HintPath>C:/Users/q8m90/Dropbox/GameCreate/Unity/Candy-Rogue/Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>

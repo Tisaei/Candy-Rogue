@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6e4e4fc705376343a3e65b25d94f0e2, type: 3}
+  m_Name: WallTile
+  m_EditorClassIdentifier: 
+  m_Sprites:
+  - {fileID: -5088579813039976073, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: -8290851204566928522, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: 8217561016715357404, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: 4322367866143169025, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: 6727219510286276970, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: -7496699914591933334, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: -4367566501838797595, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: -8409258150707373161, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: 4690718901061021183, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: -7503125355729931891, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: 2916353695675831376, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: -4598010363930240559, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: 5188234995674738314, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: -1450488586185496574, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
+  - {fileID: 2119209189664921567, guid: 395cf0daaa0503041bb10673bb98b61e, type: 3}
