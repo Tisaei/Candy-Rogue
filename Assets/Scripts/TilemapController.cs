@@ -27,7 +27,7 @@ public class TilemapController : MonoBehaviour
     private Array2D mapData;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         Tilemap = GetComponent<Tilemap>();
         Tilemap.ClearAllTiles();
@@ -35,12 +35,9 @@ public class TilemapController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            GnerateArray();
-        }
+
     }
 
     public void GnerateArray()
@@ -119,7 +116,7 @@ public class TilemapController : MonoBehaviour
     }
 
 
-    public Pos2D CoordinateMoveTo(Pos2D position, Vec2D vec)
+    public (bool isCollide, Vec2D newVec, Pos2D newPos) CoordinateMoveTo(Pos2D position, Vec2D vec)
     {
         // positionからvec分移動したのちの座標を返す.
         float nowX = (float)position.x;
@@ -135,7 +132,7 @@ public class TilemapController : MonoBehaviour
                 break;
             case eDir.Up:   //上
                 dirX = 0f;
-                dirY = -1f;
+                dirY = 1f;
                 break;
             case eDir.Right://右
                 dirX = 1f;
@@ -143,39 +140,44 @@ public class TilemapController : MonoBehaviour
                 break;
             default:        //下
                 dirX = 0f;
-                dirY = 1f;
+                dirY = -1f;
                 break;
         }
         nLoop = (int)vec.len;
-        for(int i = 0; i < nLoop; i++)
+        bool isCollide = false;
+        int i;
+        for(i = 0; i < nLoop; i++)
         {
-            var gimmick = mapData.Get((int)Math.Round(nowX + dirX), (int)Math.Round(nowY + dirY));
-            if (gimmick == eMapGimmick.Wall || gimmick == eMapGimmick.Null) break;
+            if (IsCollide((int)Math.Round(nowX + dirX), (int)Math.Round(nowY + dirY)))
+            {
+                isCollide = true;
+                break;
+            }
             nowX += dirX;
             nowY += dirY;
         }
-        return new Pos2D((int)Math.Round(nowX), (int)Math.Round(nowY));
+        return (isCollide, new Vec2D(vec.dir, (eLen)Enum.ToObject(typeof(eLen), i)), new Pos2D((int)Math.Round(nowX), (int)Math.Round(nowY)));
     }
 
-    int ToWorldX(int xgrid)
+    public float ToWorldX(int xgrid)
     {
-        return charactorDots * xgrid + charactorDots / 2 + (int)TilemapTransform.position.x;
+        return charactorDots * xgrid + charactorDots / 2 + TilemapTransform.position.x;
     }
-    int ToWorldY(int ygrid)
+    public float ToWorldY(int ygrid)
     {
-        return charactorDots * ygrid + charactorDots / 2 + (int)TilemapTransform.position.y;
+        return charactorDots * ygrid + charactorDots / 2 + TilemapTransform.position.y;
     }
-    int ToGridX(int xworld)
+    public int ToGridX(float xworld)
     {
-        return (xworld - (int)TilemapTransform.position.x - charactorDots / 2) / charactorDots;
+        return ((int)xworld - (int)TilemapTransform.position.x - charactorDots / 2) / charactorDots;
     }
-    int ToGridY(int yworld)
+    public int ToGridY(float yworld)
     {
-        return (yworld - (int)TilemapTransform.position.y - charactorDots / 2) / charactorDots;
+        return ((int)yworld - (int)TilemapTransform.position.y - charactorDots / 2) / charactorDots;
     }
-    bool IsCollide(Pos2D position) // 指定の座標が壁かどうかをチェック.
+    public bool IsCollide(int xgrid, int ygrid) // 指定の座標が壁かどうかをチェック.
     {
-        var gimmick = mapData.Get(position.x, position.y);
+        var gimmick = mapData.Get(xgrid, ygrid);
         return (gimmick == eMapGimmick.Wall || gimmick == eMapGimmick.Null);
     }
 }

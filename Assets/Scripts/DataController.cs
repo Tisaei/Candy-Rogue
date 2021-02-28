@@ -8,75 +8,83 @@ public class DataController : MonoBehaviour
 {
     [SerializeField]
     private GameObject TileMap;
-    private TilemapController TilemapC;
+    private TilemapController tilemapController;
+    [SerializeField]
+    private GameObject Player;
+    private PlayerController playerController;
 
     [System.Serializable]
     public class Data
     {
-        public dataX[] mapDataX;
+        public dataY[] mapDataY;
         [System.Serializable]
-        public struct dataX
+        public struct dataY
         {
-            public eMapGimmick[] dataY;
+            public eMapGimmick[] dataX;
         }
+        public Pos2D playerPos;
+        public eDir playerDir;
     }
     private Data SaveData = new Data();
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        TilemapC = TileMap.GetComponent<TilemapController>();
+        tilemapController = TileMap.GetComponent<TilemapController>();
+        playerController = Player.GetComponent<PlayerController>();
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            Data data = Load();
-            eMapGimmick[,] mapData = new eMapGimmick[data.mapDataX.Length, data.mapDataX[0].dataY.Length];
-            for (int x = 0; x < mapData.GetLength(0); x++)
-            {
-                for (int y = 0; y < mapData.GetLength(1); y++)
-                {
-                    mapData[x, y] = data.mapDataX[x].dataY[y];
-                }
-            }
-            TilemapC.LoadArray(mapData);
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            Array2D data = TilemapC.GetArray2D();
-            SaveData.mapDataX = new Data.dataX[data.GetWidth()];
-            for(int x = 0; x < data.GetWidth(); x++)
-            {
-                SaveData.mapDataX[x].dataY = new eMapGimmick[data.GetHeight()];
-                for (int y = 0; y < data.GetHeight(); y++)
-                {
-                    SaveData.mapDataX[x].dataY[y] = data.Get(x, y);
-                }
-            }
-            Save();
-            Debug.Log("Saved");
-        }
     }
 
-    private void Save()
+    public void Save()
     {
+        Array2D data = tilemapController.GetArray2D();
+        SaveData.mapDataY = new Data.dataY[data.GetHeight()];
+        int height = data.GetHeight();
+        for (int y = 0; y < height; y++)
+        {
+            SaveData.mapDataY[y].dataX = new eMapGimmick[data.GetWidth()];
+            for (int x = 0; x < data.GetWidth(); x++)
+            {
+                SaveData.mapDataY[y].dataX[x] = data.Get(x, height - 1 - y);
+            }
+        }
+
+        var (playerPos, playerDir) = playerController.GetStatus();
+        SaveData.playerPos = playerPos;
+        SaveData.playerDir = playerDir;
+
+
         string jsonstr = JsonUtility.ToJson(SaveData);
-        Debug.Log("Saving\n"+jsonstr);
         var writer = new StreamWriter(Application.dataPath + "/save.json", false);
         writer.Write(jsonstr);
         writer.Flush();
         writer.Close();
+        Debug.Log("Saved");
     }
-    private Data Load()
+    public void Load()
     {
         StreamReader reader = new StreamReader(Application.dataPath + "/save.json");
         string datastr = reader.ReadToEnd();
         reader.Close();
         Data data = JsonUtility.FromJson<Data>(datastr);
-        return data;
+
+
+        eMapGimmick[,] mapData = new eMapGimmick[data.mapDataY[0].dataX.Length, data.mapDataY.Length];
+        int height = mapData.GetLength(1);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < mapData.GetLength(0); x++)
+            {
+                mapData[x, height - 1 - y] = data.mapDataY[y].dataX[x];
+            }
+        }
+        tilemapController.LoadArray(mapData);
+
+        playerController.SetStatus(data.playerPos, data.playerDir);
     }
 }

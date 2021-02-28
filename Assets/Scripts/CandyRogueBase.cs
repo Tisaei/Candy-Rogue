@@ -1,4 +1,5 @@
-﻿public enum eDir //移動方向.
+﻿[System.Serializable]
+public enum eDir //移動方向.
 {
     Left,   //左.
     Up,     //上.
@@ -7,6 +8,7 @@
 }
 public enum eLen //移動量(グリッド単位).
 {
+    Zero = 0,   //0
     One = 1,    //1
     Two = 2,    //2
     Three = 3   //3
@@ -21,6 +23,7 @@ public struct Vec2D //eDir，eLenを合わせたベクトル.
         len = l;
     }
 }
+[System.Serializable]
 public struct Pos2D //グリッド座標.
 {
     public int x;
