@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using CandyRogueBase;
 
 public class TilemapController : MonoBehaviour
 {
     private Tilemap Tilemap;
     private Transform TilemapTransform;
+    private List<EnemyController> enemyControllers;
+    [SerializeField]
+    private GameObject Player;
+    private PlayerController playerController;
 
     [SerializeField]
-    private TileBase FloorTile;
-    [SerializeField]
-    private TileBase StairTile;
-    [SerializeField]
-    private TileBase WallTile;
+    private TileBase FloorTile, StairTile, WallTile;
 
     [SerializeField]
-    private int mapWidth = 25;
-    [SerializeField]
-    private int mapHeight = 25;
+    private int mapWidth = 25, mapHeight = 25;
 
     [SerializeField]
     private int charactorDots = 16;
@@ -32,12 +31,13 @@ public class TilemapController : MonoBehaviour
         Tilemap = GetComponent<Tilemap>();
         Tilemap.ClearAllTiles();
         TilemapTransform = GetComponent<Transform>();
+        playerController = Player.GetComponent<PlayerController>();
     }
 
     // Update is called once per frame
     private void Update()
     {
-
+        
     }
 
     public void GnerateArray()
@@ -115,12 +115,12 @@ public class TilemapController : MonoBehaviour
         }
     }
 
-
-    public (bool isCollide, Vec2D newVec, Pos2D newPos) CoordinateMoveTo(Pos2D position, Vec2D vec)
+    public void RefCopyEnemyControllers(List<EnemyController> enemyControllers) => this.enemyControllers = enemyControllers;
+    public (ActorController collideActor, Vec2D newVec, Pos2D newPos) CoordinateMoveTo(Pos2D position, Vec2D vec)
     {
         // positionからvec分移動したのちの座標を返す.
-        float nowX = (float)position.x;
-        float nowY = (float)position.y;
+        float nowX = position.x;
+        float nowY = position.y;
         float dirX;
         float dirY;
         int nLoop;
@@ -144,19 +144,33 @@ public class TilemapController : MonoBehaviour
                 break;
         }
         nLoop = (int)vec.len;
-        bool isCollide = false;
+        ActorController collideActor = null;
         int i;
         for(i = 0; i < nLoop; i++)
         {
-            if (IsCollide((int)Math.Round(nowX + dirX), (int)Math.Round(nowY + dirY)))
-            {
-                isCollide = true;
-                break;
-            }
+            if (isCollideWall((int)Math.Round(nowX + dirX), (int)Math.Round(nowY + dirY))) break;
+            collideActor = CollideActor((int)Math.Round(nowX + dirX), (int)Math.Round(nowY + dirY));
+            if(collideActor != null) break;
             nowX += dirX;
             nowY += dirY;
         }
-        return (isCollide, new Vec2D(vec.dir, (eLen)Enum.ToObject(typeof(eLen), i)), new Pos2D((int)Math.Round(nowX), (int)Math.Round(nowY)));
+        return (collideActor, new Vec2D(vec.dir, (eLen)Enum.ToObject(typeof(eLen), i)), new Pos2D((int)Math.Round(nowX), (int)Math.Round(nowY)));
+    }
+    public bool isCollideWall(int xgrid, int ygrid) // 指定の座標が壁かどうかをチェック.
+    {
+        var gimmick = mapData.Get(xgrid, ygrid);
+        return (gimmick == eMapGimmick.Wall || gimmick == eMapGimmick.Null);
+    }
+    private ActorController CollideActor(int xgrid, int ygrid) // 指定の座標に敵orプレイヤーがいるかどうかをチェック.
+    {
+        Pos2D playerc = playerController.GetNowPosGrid();
+        if (playerc.x == xgrid && playerc.y == ygrid) return playerController;
+        foreach(EnemyController ec in enemyControllers)
+        {
+            Pos2D enemyc = ec.GetNowPosGrid();
+            if (enemyc.x == xgrid && enemyc.y == ygrid) return ec;
+        }
+        return null;
     }
 
     public float ToWorldX(int xgrid)
@@ -174,11 +188,6 @@ public class TilemapController : MonoBehaviour
     public int ToGridY(float yworld)
     {
         return ((int)yworld - (int)TilemapTransform.position.y - charactorDots / 2) / charactorDots;
-    }
-    public bool IsCollide(int xgrid, int ygrid) // 指定の座標が壁かどうかをチェック.
-    {
-        var gimmick = mapData.Get(xgrid, ygrid);
-        return (gimmick == eMapGimmick.Wall || gimmick == eMapGimmick.Null);
     }
 }
 

@@ -22,3 +22,11 @@ The following packages were 更新済:
   com.unity.2d.pixel-perfect をバージョン 2.0.4 から 2.1.0 へ
   com.unity.mobile.notifications をバージョン 1.0.3 から 1.3.2 へ
   com.unity.test-framework をバージョン 1.1.20 から 1.1.22 へ
+
+=== Wed Mar  3 15:41:40 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 更新済:
+  com.unity.mobile.android-logcat をバージョン 1.2.0 から 1.2.1 へ

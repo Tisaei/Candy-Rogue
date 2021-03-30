@@ -1,0 +1,26 @@
+﻿<Properties StartupConfiguration="{2D429450-5684-2E74-4959-6F65170C12B6}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/SequenceManagerController.cs">
+    <Files>
+      <File FileName="Assets/Scripts/SequenceManagerController.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Candy-Rogue" expanded="True">
+            <Node name="Assets" expanded="True" selected="True">
+              <Node name="Editor" expanded="True" />
+              <Node name="Scripts" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="034b090f-9c1b-4320-980b-7d9359362834" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>

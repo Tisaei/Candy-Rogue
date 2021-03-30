@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.IO;
+using CandyRogueBase;
 
 public class DataController : MonoBehaviour
 {
     [SerializeField]
-    private GameObject TileMap;
+    private GameObject TileMap, Player;
+
     private TilemapController tilemapController;
-    [SerializeField]
-    private GameObject Player;
     private PlayerController playerController;
 
     [System.Serializable]
@@ -69,6 +69,27 @@ public class DataController : MonoBehaviour
     public void Load()
     {
         StreamReader reader = new StreamReader(Application.dataPath + "/save.json");
+        string datastr = reader.ReadToEnd();
+        reader.Close();
+        Data data = JsonUtility.FromJson<Data>(datastr);
+
+
+        eMapGimmick[,] mapData = new eMapGimmick[data.mapDataY[0].dataX.Length, data.mapDataY.Length];
+        int height = mapData.GetLength(1);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < mapData.GetLength(0); x++)
+            {
+                mapData[x, height - 1 - y] = data.mapDataY[y].dataX[x];
+            }
+        }
+        tilemapController.LoadArray(mapData);
+
+        playerController.SetStatus(data.playerPos, data.playerDir);
+    }
+    public void CustomLoad()
+    {
+        StreamReader reader = new StreamReader(Application.dataPath + "/save-custom.json");
         string datastr = reader.ReadToEnd();
         reader.Close();
         Data data = JsonUtility.FromJson<Data>(datastr);
