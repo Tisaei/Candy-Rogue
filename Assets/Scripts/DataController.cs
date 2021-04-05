@@ -8,10 +8,11 @@ using CandyRogueBase;
 public class DataController : MonoBehaviour
 {
     [SerializeField]
-    private GameObject TileMap, Player;
+    private GameObject TileMap, Player, SequenceManager;
 
     private TilemapController tilemapController;
     private PlayerController playerController;
+    private SequenceManagerController sequenceManagerController;
 
     [System.Serializable]
     public class Data
@@ -22,16 +23,26 @@ public class DataController : MonoBehaviour
         {
             public eMapGimmick[] dataX;
         }
+
         public Pos2D playerPos;
         public eDir playerDir;
+
+        public enemyData[] enemyDatas;
+        [System.Serializable]
+        public struct enemyData
+        {
+            public int id;
+            public Pos2D pos;
+            public eDir dir;
+        }
     }
-    private Data SaveData = new Data();
 
     // Start is called before the first frame update
     private void Start()
     {
         tilemapController = TileMap.GetComponent<TilemapController>();
         playerController = Player.GetComponent<PlayerController>();
+        sequenceManagerController = SequenceManager.GetComponent<SequenceManagerController>();
     }
 
     // Update is called once per frame
@@ -42,6 +53,9 @@ public class DataController : MonoBehaviour
 
     public void Save()
     {
+        Data SaveData = new Data();
+
+        // マップ情報.
         Array2D data = tilemapController.GetArray2D();
         SaveData.mapDataY = new Data.dataY[data.GetHeight()];
         int height = data.GetHeight();
@@ -54,10 +68,21 @@ public class DataController : MonoBehaviour
             }
         }
 
+        // プレイヤー情報.
         var (playerPos, playerDir) = playerController.GetStatus();
         SaveData.playerPos = playerPos;
         SaveData.playerDir = playerDir;
 
+        // 敵情報.
+        List<EnemyController> enemyList = sequenceManagerController.GetEnemyControllerList();
+        SaveData.enemyDatas = new Data.enemyData[enemyList.Count];
+        for(int i = 0; i < enemyList.Count; i++)
+        {
+            SaveData.enemyDatas[i].id = enemyList[i].enemyData.id;
+            var (enemyPos, enemyDir) = enemyList[i].GetStatus();
+            SaveData.enemyDatas[i].pos = enemyPos;
+            SaveData.enemyDatas[i].dir = enemyDir;
+        }
 
         string jsonstr = JsonUtility.ToJson(SaveData);
         var writer = new StreamWriter(Application.dataPath + "/save.json", false);

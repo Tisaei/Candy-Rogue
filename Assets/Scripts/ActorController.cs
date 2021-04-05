@@ -10,7 +10,7 @@ public abstract class ActorController : MonoBehaviour
 {
     [SerializeField]
     private GameObject Tilemap;
-    private TilemapController TilemapController;
+    protected TilemapController TilemapController;
 
     [SerializeField]
     private int firstPosGridX = 0, firstPosGridY = 0;

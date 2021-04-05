@@ -119,6 +119,7 @@ public class TilemapController : MonoBehaviour
     public (ActorController collideActor, Vec2D newVec, Pos2D newPos) CoordinateMoveTo(Pos2D position, Vec2D vec)
     {
         // positionからvec分移動したのちの座標を返す.
+        //もし別のActorにぶつかったのならその手前の座標と，ぶつかったActorを返す.
         float nowX = position.x;
         float nowY = position.y;
         float dirX;

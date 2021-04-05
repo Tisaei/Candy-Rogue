@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e003f02874b08b4e92071fed45dd3e0, type: 3}
   m_Name: Macaroon
   m_EditorClassIdentifier: 
-  enemyName: Macaroon
+  enemyName: "\u30DE\u30AB\u30ED\u30F3"
+  id: 2
   maxHp: 10
   atk: 5
   def: 0

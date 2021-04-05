@@ -1,4 +1,6 @@
-﻿namespace CandyRogueBase
+﻿using System;
+
+namespace CandyRogueBase
 {
     [System.Serializable]
     public enum eDir //移動方向.
@@ -23,6 +25,37 @@
         {
             dir = d;
             len = l;
+        }
+        public static Pos2D ToPos2D(eDir d, eLen l)
+        {
+            float dirXf;
+            float dirYf;
+            switch (d)
+            {
+                case eDir.Left: //左
+                    dirXf = -1f;
+                    dirYf = 0f;
+                    break;
+                case eDir.Up:   //上
+                    dirXf = 0f;
+                    dirYf = 1f;
+                    break;
+                case eDir.Right://右
+                    dirXf = 1f;
+                    dirYf = 0f;
+                    break;
+                default:        //下
+                    dirXf = 0f;
+                    dirYf = -1f;
+                    break;
+            }
+            int dirXi = (int)Math.Round(dirXf * (int)l);
+            int dirYi = (int)Math.Round(dirYf * (int)l);
+            return new Pos2D(dirXi, dirYi);
+        }
+        public Pos2D ToPos2D()
+        {
+            return ToPos2D(dir, len);
         }
     }
 

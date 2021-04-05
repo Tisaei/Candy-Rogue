@@ -6,6 +6,7 @@ using UnityEngine;
 public class EnemyData : ScriptableObject
 {
 	public string enemyName;
+	public int id;
 	public int maxHp;
 	public int atk;
 	public int def;

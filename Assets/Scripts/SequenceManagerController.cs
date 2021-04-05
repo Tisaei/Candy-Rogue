@@ -49,6 +49,8 @@ public class SequenceManagerController : MonoBehaviour
         ACT_E_MOVE
     }
 
+    public List<EnemyController> GetEnemyControllerList() { return new List<EnemyController>(enemyControllers); }
+
     public async UniTask DoOneTurn(Behavior playerBehavior)
     {
         bool isAtack = false;
@@ -109,14 +111,85 @@ public class SequenceManagerController : MonoBehaviour
 
     private Behavior[] DecideWhatToDo(Behavior playerBehavior)
     {
+        // 敵たちの行動を，矛盾がないように決める.
         int el = enemyControllers.Count;
         Behavior[] enemiesBehavior = new Behavior[el];
 
         var nowLoadingAnimation = StartCoroutine(nowLoadingController.NowLoadingAnimation());
         for (int i = 0; i < el; i++)
         {
-            enemiesBehavior[i] = enemyControllers[i].decideBehavior(playerBehavior);
+            enemiesBehavior[i] = enemyControllers[i].decideBehavior(playerBehavior); // 一旦決めさせる.
         }
+
+        List<Pos2D> KeepOutCoodinateList = new List<Pos2D>(); // 「行けない座標リスト(KOL)」を作る.
+        List<int> enemyBehaviourUnConfirmedList = new List<int>(); // 「行動確定してない敵リスト(EBCL)」を作る.
+        List<int> moveEIndex = new List<int>();
+        for (int i = 0; i < el; i++)
+        {
+            if (!enemiesBehavior[i].isMove)
+            {
+                KeepOutCoodinateList.Add(enemyControllers[i].GetNowPosGrid()); // KOLにActの敵の座標を追加.
+            } 
+            else
+            {
+                moveEIndex.Add(i);
+                enemyBehaviourUnConfirmedList.Add(i); // EBCLにMoveの敵のインテックスを追加.
+            }
+        }
+        foreach(int i in moveEIndex)
+        {
+            if (!enemyBehaviourUnConfirmedList.Contains(i)) continue; // 自分の行動がすでに確定しているならcontinue.
+            List<int> processingList = new List<int>();
+            EnemyBehaviourToConsistency(i, ref processingList); // refがなくとも参照渡しになるが，分かりやすくするため明示的に指定.
+        }
+        bool EnemyBehaviourToConsistency(int n, ref List<int> processingList)
+        {
+            if (processingList.Contains(n)) return true; // nが処理中ならばtrueを返す.
+            Vec2D moveVec = enemiesBehavior[n].move;
+            Pos2D nowPos = enemyControllers[n].GetNowPosGrid();
+            Pos2D goalPos = nowPos + moveVec.ToPos2D(); // 目標座標を計算.
+            if (enemiesBehavior[n].move.len == eLen.Zero) // もし移動量が最初から0なら,
+            {
+                KeepOutCoodinateList.Add(goalPos); // KOLに追加.
+                if (enemyBehaviourUnConfirmedList.Contains(n)) enemyBehaviourUnConfirmedList.Remove(n); // EBCLから削除.
+                return false;
+            }
+            processingList.Add(n); // plにnを追加.
+            do
+            {
+                Pos2D playerPos;
+                if (playerBehavior.isMove) playerPos = playerController.GetNowPosGrid() + playerBehavior.move.ToPos2D(); else playerPos = playerController.GetNowPosGrid();
+                if (KeepOutCoodinateList.Contains(goalPos) || playerPos.Equals(goalPos)) // 目標座標がKOLにあるor目標座標にプレイヤーがいる.
+                {
+                    moveVec.len--; // 移動ベクトルの移動量を1減らす.
+                    goalPos = nowPos + moveVec.ToPos2D(); // 目標座標を再計算.
+                }
+                else
+                {
+                    int indexOfOtherEnemy = -1; // 目標座標に敵がいるとそのインデックスが入る.
+                    foreach(int i in enemyBehaviourUnConfirmedList) { if (enemyControllers[i].GetNowPosGrid().Equals(goalPos)) { indexOfOtherEnemy = i; break; } } // 目標座標とほかの敵の座標を比較.
+                    if(indexOfOtherEnemy != -1 && !EnemyBehaviourToConsistency(indexOfOtherEnemy, ref processingList)) // 目標座標に敵かいる and その敵が結局移動しない.
+                    {
+                        moveVec.len--; // 移動ベクトルの移動量を1減らす.
+                        goalPos = nowPos + moveVec.ToPos2D(); // 目標座標を再計算.
+                    }
+                    else // 目標座標に敵がいない or いるけどその敵は結局動く.
+                    {
+                        if (processingList.Contains(n)) processingList.Remove(n); // plから削除.
+                        enemiesBehavior[n].move = moveVec; // 目標座標を確定.
+                        KeepOutCoodinateList.Add(goalPos); // KOLに追加.
+                        if (enemyBehaviourUnConfirmedList.Contains(n)) enemyBehaviourUnConfirmedList.Remove(n); // EBCLから削除.
+                        return true;
+                    }
+                }
+            } while (moveVec.len == eLen.Zero);
+            if (processingList.Contains(n)) processingList.Remove(n); // plから削除.
+            enemiesBehavior[n].move = moveVec; // 目標座標を確定.
+            KeepOutCoodinateList.Add(goalPos); // KOLに追加.
+            if (enemyBehaviourUnConfirmedList.Contains(n)) enemyBehaviourUnConfirmedList.Remove(n); // EBCLから削除.
+            return false;
+        }
+
         StopCoroutine(nowLoadingAnimation);
         nowLoadingController.DeleteText();
 

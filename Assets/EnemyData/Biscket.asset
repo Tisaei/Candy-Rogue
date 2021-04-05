@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e003f02874b08b4e92071fed45dd3e0, type: 3}
   m_Name: Biscket
   m_EditorClassIdentifier: 
-  enemyName: Biscket
+  enemyName: "\u30D3\u30B9\u30B1\u30C3\u30C8"
+  id: 1
   maxHp: 5
   atk: 1
   def: 1

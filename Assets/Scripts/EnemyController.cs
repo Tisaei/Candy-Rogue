@@ -6,24 +6,42 @@ using CandyRogueBase;
 public class EnemyController : ActorController
 {
     [SerializeField]
-    private EnemyData enemyData;
+    public EnemyData enemyData;
 
-    public Behavior decideBehavior(Behavior playerBehavior)
+    public Behavior decideBehavior(Behavior playerBehavior) // EnemyBehaviourToConsistencyでは目標座標が壁かどうか検証しないのでここで壁を目標座標にしないようにする.
     {
+        Vec2D moveVec;
         if (playerBehavior.isMove)
         {
-            if(playerBehavior.move.dir == eDir.Up || playerBehavior.move.dir == eDir.Down)
+            if (GetNowPosGrid().y % 2 == 0)
             {
-                return new Behavior(true, new Vec2D(eDir.Up, eLen.One));
+                if (playerBehavior.move.dir == eDir.Up || playerBehavior.move.dir == eDir.Down)
+                {
+                    moveVec = new Vec2D(eDir.Up, eLen.One);
+                }
+                else
+                {
+                    moveVec = new Vec2D(eDir.Down, eLen.One);
+                }
+                    
             }
             else
             {
-                return new Behavior(true, new Vec2D(eDir.Down, eLen.One));
+                return new Behavior(false);
             }
         }
         else
         {
-            return new Behavior(false);
+            if(GetNowPosGrid().y % 2 == 0)
+            {
+                moveVec = new Vec2D(eDir.Up, eLen.One);
+            }
+            else
+            {
+                moveVec = new Vec2D(eDir.Down, eLen.One);
+            }
         }
+        (_, moveVec, _) = TilemapController.CoordinateMoveTo(GetNowPosGrid(), moveVec);
+        return new Behavior(true, moveVec);
     }
 }
