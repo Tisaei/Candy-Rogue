@@ -16,6 +16,7 @@ public class SequenceManagerController : MonoBehaviour
     private List<EnemyController> enemyControllers;
 
     public Status status { get; set; } = Status.KEY_INPUT;
+    public bool isResetEnemyControllerList { get; set; } = false;
 
     // Start is called before the first frame update
     void Start()
@@ -32,7 +33,15 @@ public class SequenceManagerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (isResetEnemyControllerList) // Destroy()したフレームの最後で削除されるので次のフレームでリセット.(ButtonManagerControllerのUpdateより先に呼ばれる必要あり)
+        {
+            Debug.Log("Clear前\n" + string.Join(",\n", enemyControllers));
+            enemyControllers.Clear();
+            Debug.Log("Clear後\n" + string.Join(",\n", enemyControllers));
+            enemyControllers.AddRange(Array.ConvertAll(GameObject.FindGameObjectsWithTag("Enemy"), g => g.GetComponent<EnemyController>()));
+            Debug.Log("Add後\n" + string.Join(",\n", enemyControllers));
+            isResetEnemyControllerList = false;
+        }
     }
 
     public enum Status

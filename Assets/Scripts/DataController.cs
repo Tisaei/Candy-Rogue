@@ -8,7 +8,7 @@ using CandyRogueBase;
 public class DataController : MonoBehaviour
 {
     [SerializeField]
-    private GameObject TileMap, Player, SequenceManager;
+    private GameObject TileMap, Player, SequenceManager, Canvas;
 
     private TilemapController tilemapController;
     private PlayerController playerController;
@@ -98,19 +98,31 @@ public class DataController : MonoBehaviour
         reader.Close();
         Data data = JsonUtility.FromJson<Data>(datastr);
 
-
+        // マップ情報.
         eMapGimmick[,] mapData = new eMapGimmick[data.mapDataY[0].dataX.Length, data.mapDataY.Length];
         int height = mapData.GetLength(1);
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < mapData.GetLength(0); x++)
-            {
-                mapData[x, height - 1 - y] = data.mapDataY[y].dataX[x];
-            }
-        }
+        for (int y = 0; y < height; y++) { for (int x = 0; x < mapData.GetLength(0); x++) mapData[x, height - 1 - y] = data.mapDataY[y].dataX[x]; }
         tilemapController.LoadArray(mapData);
 
+        // プレイヤー情報.
         playerController.SetStatus(data.playerPos, data.playerDir);
+
+        // 敵情報.
+        foreach(GameObject e in GameObject.FindGameObjectsWithTag("Enemy")) Destroy(e); // まずEnemyタグのついたオブジェクトをすべて削除.
+        GameObject[] enemies = Resources.LoadAll<GameObject>("Prefabs");
+        int[] enemiesID = Array.ConvertAll(enemies, e => e.GetComponent<EnemyController>().enemyData.id);
+        Debug.Log(string.Join(", ", enemiesID));
+        foreach (Data.enemyData ed in data.enemyDatas)
+        {
+            int index = Array.IndexOf(enemiesID, ed.id);
+            if (index != -1)
+            {
+                GameObject e = Instantiate(enemies[index]);
+                e.GetComponent<EnemyController>().SetStatus(ed.pos, ed.dir);
+                e.transform.SetParent(Canvas.transform);
+            }
+        }
+        sequenceManagerController.isResetEnemyControllerList = true;
     }
     public void CustomLoad()
     {
@@ -119,18 +131,31 @@ public class DataController : MonoBehaviour
         reader.Close();
         Data data = JsonUtility.FromJson<Data>(datastr);
 
-
+        // マップ情報.
         eMapGimmick[,] mapData = new eMapGimmick[data.mapDataY[0].dataX.Length, data.mapDataY.Length];
         int height = mapData.GetLength(1);
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < mapData.GetLength(0); x++)
-            {
-                mapData[x, height - 1 - y] = data.mapDataY[y].dataX[x];
-            }
-        }
+        for (int y = 0; y < height; y++) { for (int x = 0; x < mapData.GetLength(0); x++) mapData[x, height - 1 - y] = data.mapDataY[y].dataX[x]; }
         tilemapController.LoadArray(mapData);
 
+        // プレイヤー情報.
         playerController.SetStatus(data.playerPos, data.playerDir);
+
+        // 敵情報.
+        foreach (GameObject e in GameObject.FindGameObjectsWithTag("Enemy")) Destroy(e); // まずEnemyタグのついたオブジェクトをすべて削除.
+        GameObject[] enemies = Resources.LoadAll<GameObject>("Prefabs");
+        int[] enemiesID = Array.ConvertAll(enemies, e => e.GetComponent<EnemyController>().enemyData.id);
+        Debug.Log(string.Join(", ", enemiesID));
+        foreach (Data.enemyData ed in data.enemyDatas)
+        {
+            int index = Array.IndexOf(enemiesID, ed.id);
+            Debug.Log("index:" + index.ToString() + ", id:" + ed.id.ToString());
+            if (index != -1)
+            {
+                GameObject e = Instantiate(enemies[index]);
+                e.GetComponent<EnemyController>().SetStatus(ed.pos, ed.dir);
+                e.transform.SetParent(Canvas.transform);
+            }
+        }
+        sequenceManagerController.isResetEnemyControllerList = true;
     }
 }

@@ -10,6 +10,7 @@ public class PlayerController : ActorController
     [SerializeField]
     private GameObject Camera;
     private CameraController cameraController;
+    public override string ToString() { return base.ToString() + " Player"; }
 
     protected override void Start()
     {

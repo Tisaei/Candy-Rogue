@@ -8,19 +8,16 @@ using CandyRogueBase;
 
 public abstract class ActorController : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject Tilemap;
     protected TilemapController TilemapController;
 
     [SerializeField]
     private int firstPosGridX = 0, firstPosGridY = 0;
 
     private Pos2D nowPosGrid;
-    public Pos2D GetNowPosGrid()
-    {
-        return nowPosGrid;
-    }
+    public Pos2D GetNowPosGrid() { return nowPosGrid; }
     private eDir dir;
+
+    public override string ToString() { return "Position:(" + nowPosGrid.x.ToString() + "," + nowPosGrid.y.ToString() + ") Direction:" + dir.ToString(); }
 
     private Vector3 targetPosWorld; //移動先のワールド座標.
 
@@ -49,9 +46,12 @@ public abstract class ActorController : MonoBehaviour
 
     private eTurnState turnState;
 
+    private void Awake() // Instantiateの直後ではまだStartは呼び出されていないので.
+    {
+        TilemapController = GameObject.Find("Tilemap").GetComponent<TilemapController>();
+    }
     protected virtual void Start()
     {
-        TilemapController = Tilemap.GetComponent<TilemapController>();
         nowPosGrid = new Pos2D(firstPosGridX, firstPosGridY);
         Vector3 tempPosWorld = Vector3.zero;
         (tempPosWorld.x, tempPosWorld.y) = (TilemapController.ToWorldX(nowPosGrid.x), TilemapController.ToWorldY(nowPosGrid.y));

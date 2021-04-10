@@ -7,6 +7,7 @@ public class EnemyController : ActorController
 {
     [SerializeField]
     public EnemyData enemyData;
+    public override string ToString() { return base.ToString() + " Enemy(" + enemyData.enemyName + ")"; }
 
     public Behavior decideBehavior(Behavior playerBehavior) // EnemyBehaviourToConsistencyでは目標座標が壁かどうか検証しないのでここで壁を目標座標にしないようにする.
     {

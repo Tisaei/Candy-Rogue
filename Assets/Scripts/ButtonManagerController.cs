@@ -76,17 +76,6 @@ public class ButtonManagerController : MonoBehaviour
                 if (Input.GetKey(KeyCode.LeftShift))
                 {
                     dataController.CustomLoad();
-
-                    // ここから(最終的にLoad関数内で位置を決める).
-                    enemyControllers = new List<EnemyController>();
-                    enemyControllers.AddRange(Array.ConvertAll(GameObject.FindGameObjectsWithTag("Enemy"), g => g.GetComponent<EnemyController>()));
-                    int i = 0;
-                    foreach(EnemyController ec in enemyControllers)
-                    {
-                        ec.SetStatus(new Pos2D(10, 14 + i), eDir.Up);
-                        i++;
-                    }
-                    // ここまで.
                 }
                 else
                 {

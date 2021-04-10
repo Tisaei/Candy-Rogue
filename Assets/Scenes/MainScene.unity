@@ -1033,7 +1033,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d72ce26685d1a974598d125e95fb7d3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Tilemap: {fileID: 289556065}
   firstPosGridX: 10
   firstPosGridY: 10
   doConstantVMotion: 0
@@ -1171,6 +1170,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TileMap: {fileID: 289556065}
   Player: {fileID: 1591052866}
+  SequenceManager: {fileID: 1346850549}
+  Canvas: {fileID: 896881612}
 --- !u!4 &1965739621
 Transform:
   m_ObjectHideFlags: 0
@@ -1312,6 +1313,11 @@ PrefabInstance:
       propertyPath: Tilemap
       value: 
       objectReference: {fileID: 289556065}
+    - target: {fileID: 542203260814787967, guid: 30ef231b8d665ee4c981604215392e90,
+        type: 3}
+      propertyPath: firstPosGridY
+      value: 17
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 30ef231b8d665ee4c981604215392e90, type: 3}
 --- !u!1001 &8311323476980029327
@@ -1381,6 +1387,11 @@ PrefabInstance:
       propertyPath: Tilemap
       value: 
       objectReference: {fileID: 289556065}
+    - target: {fileID: 2011117934524536179, guid: 088670f378f209644a317c9016a77ed2,
+        type: 3}
+      propertyPath: firstPosGridY
+      value: 18
+      objectReference: {fileID: 0}
     - target: {fileID: 4079816365746763234, guid: 088670f378f209644a317c9016a77ed2,
         type: 3}
       propertyPath: m_Name
