@@ -220,7 +220,7 @@ public class SequenceManagerController : MonoBehaviour
 
     private async UniTask MovePlayer(Behavior playerB)
     {
-        await playerController.Move(playerB.move, this.GetCancellationTokenOnDestroy(), true);
+        await playerController.Move(playerB.move, this.GetCancellationTokenOnDestroy(), true); // Player単体でMoveということは，攻撃を兼ねた移動だということ.
     }
 
     private async UniTask MoveEnemy(IReadOnlyDictionary<int, Behavior> enemiesB)

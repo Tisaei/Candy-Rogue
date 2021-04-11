@@ -42,7 +42,7 @@ public class EnemyController : ActorController
                 moveVec = new Vec2D(eDir.Down, eLen.One);
             }
         }
-        (_, moveVec, _) = TilemapController.CoordinateMoveTo(GetNowPosGrid(), moveVec);
+        (_, moveVec, _) = TilemapController.CoordinateMoveTo(GetNowPosGrid(), moveVec, true);
         return new Behavior(true, moveVec);
     }
 }

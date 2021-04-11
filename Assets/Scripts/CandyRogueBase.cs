@@ -26,7 +26,7 @@ namespace CandyRogueBase
             dir = d;
             len = l;
         }
-        public static Pos2D ToPos2D(eDir d, eLen l)
+        public static (float, float) ToUnitPos2D(eDir d)
         {
             float dirXf;
             float dirYf;
@@ -49,6 +49,11 @@ namespace CandyRogueBase
                     dirYf = -1f;
                     break;
             }
+            return (dirXf, dirYf);
+        }
+        public static Pos2D ToPos2D(eDir d, eLen l)
+        {
+            var (dirXf, dirYf) = ToUnitPos2D(d);
             int dirXi = (int)Math.Round(dirXf * (int)l);
             int dirYi = (int)Math.Round(dirYf * (int)l);
             return new Pos2D(dirXi, dirYi);

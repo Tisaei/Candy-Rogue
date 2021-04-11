@@ -116,46 +116,33 @@ public class TilemapController : MonoBehaviour
     }
 
     public void RefCopyEnemyControllers(List<EnemyController> enemyControllers) => this.enemyControllers = enemyControllers;
-    public (ActorController collideActor, Vec2D newVec, Pos2D newPos) CoordinateMoveTo(Pos2D position, Vec2D vec)
+    public (ActorController collideActor, Vec2D newVec, Pos2D newPos) CoordinateMoveTo(Pos2D position, Vec2D vec, bool onlyWall = false)
     {
         // positionからvec分移動したのちの座標を返す.
-        //もし別のActorにぶつかったのならその手前の座標と，ぶつかったActorを返す.
+        // onlyWallがfalseの時，もし別のActorにぶつかったのならその手前の座標と，ぶつかったActorを返す.
+        // もし壁にぶつかったのならその手前の座標を返し，collideActorはnullを返す.
         float nowX = position.x;
         float nowY = position.y;
-        float dirX;
-        float dirY;
-        int nLoop;
-        switch (vec.dir)
-        {
-            case eDir.Left: //左
-                dirX = -1f;
-                dirY = 0f;
-                break;
-            case eDir.Up:   //上
-                dirX = 0f;
-                dirY = 1f;
-                break;
-            case eDir.Right://右
-                dirX = 1f;
-                dirY = 0f;
-                break;
-            default:        //下
-                dirX = 0f;
-                dirY = -1f;
-                break;
-        }
-        nLoop = (int)vec.len;
+        var (dirX, dirY) = Vec2D.ToUnitPos2D(vec.dir);
+        int nLoop = (int)vec.len;
         ActorController collideActor = null;
         int i;
         for(i = 0; i < nLoop; i++)
         {
             if (isCollideWall((int)Math.Round(nowX + dirX), (int)Math.Round(nowY + dirY))) break;
-            collideActor = CollideActor((int)Math.Round(nowX + dirX), (int)Math.Round(nowY + dirY));
-            if(collideActor != null) break;
+            if (!onlyWall)
+            {
+                collideActor = CollideActor((int)Math.Round(nowX + dirX), (int)Math.Round(nowY + dirY));
+                if (collideActor != null) break;
+            }
             nowX += dirX;
             nowY += dirY;
         }
-        return (collideActor, new Vec2D(vec.dir, (eLen)Enum.ToObject(typeof(eLen), i)), new Pos2D((int)Math.Round(nowX), (int)Math.Round(nowY)));
+        return (
+            collideActor,
+            new Vec2D(vec.dir, (eLen)Enum.ToObject(typeof(eLen), i)),
+            new Pos2D((int)Math.Round(nowX), (int)Math.Round(nowY))
+        );
     }
     public bool isCollideWall(int xgrid, int ygrid) // 指定の座標が壁かどうかをチェック.
     {
