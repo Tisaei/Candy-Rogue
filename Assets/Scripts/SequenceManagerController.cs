@@ -62,18 +62,19 @@ public class SequenceManagerController : MonoBehaviour
 
     public async UniTask DoOneTurn(Behavior playerBehavior)
     {
-        bool isAtack = false;
+        ActorController actor = null;
         if (playerBehavior.isMove)
         {
             var a = playerController.GetNowPosGrid();
             var b = playerBehavior.move;
-            (ActorController actor, Vec2D newVec, Pos2D _) = tilemapController.CoordinateMoveTo(a, b);
+            Vec2D newVec;
+            (actor, newVec, _) = tilemapController.CoordinateMoveTo(a, b);
             if (actor == null && newVec.len == eLen.Zero) return; //もし壁にぶつかって結局動かないならターンを消費しない.
             if (actor != null) // もし敵にぶつかったならば攻撃とみなす.
             {
                 playerBehavior.isMove = false;
                 playerBehavior.move = newVec;
-                isAtack = true;
+                playerBehavior.act = eAct.Attack;
             }
             // 両方でなければ通常移動.
         }
@@ -98,8 +99,16 @@ public class SequenceManagerController : MonoBehaviour
         else
         {
             status = Status.ACT_P_ACT;
-            if (isAtack) await MovePlayer(playerBehavior); else await ActPlayer(playerBehavior);
+            if (playerBehavior.act == eAct.Attack) await MovePlayer(playerBehavior, actor); else await ActPlayer(playerBehavior);
             // 力尽きた敵を削除. (enemyControllersのリストが変更される)
+            for(int i = enemyControllers.Count - 1; i >= 0; i--)
+            {
+                if(enemyControllers[i].GetNowHp() == 0)
+                {
+                    Destroy(enemyControllers[i].gameObject);
+                    enemyControllers.RemoveAt(i);
+                }
+            }
 
             status = Status.ACT_E_DECIDE;
             var enemiesBehavior = DecideWhatToDo(playerBehavior);
@@ -118,7 +127,7 @@ public class SequenceManagerController : MonoBehaviour
         }
     }
 
-    private Behavior[] DecideWhatToDo(Behavior playerBehavior)
+    private Behavior[] DecideWhatToDo(Behavior playerBehavior) //敵がプレイヤーに攻撃しようとしていることをどう判断する?
     {
         // 敵たちの行動を，矛盾がないように決める.
         int el = enemyControllers.Count;
@@ -170,6 +179,13 @@ public class SequenceManagerController : MonoBehaviour
                 if (playerBehavior.isMove) playerPos = playerController.GetNowPosGrid() + playerBehavior.move.ToPos2D(); else playerPos = playerController.GetNowPosGrid();
                 if (KeepOutCoodinateList.Contains(goalPos) || playerPos.Equals(goalPos)) // 目標座標がKOLにあるor目標座標にプレイヤーがいる.
                 {
+                    if (playerPos.Equals(goalPos)) {
+                        enemiesBehavior[n].act = eAct.Attack;
+                        enemiesBehavior[n].isMove = false;
+                    } else {
+                        enemiesBehavior[n].act = eAct.NoAct;
+                        enemiesBehavior[n].isMove = true;
+                    }
                     moveVec.len--; // 移動ベクトルの移動量を1減らす.
                     goalPos = nowPos + moveVec.ToPos2D(); // 目標座標を再計算.
                 }
@@ -179,6 +195,8 @@ public class SequenceManagerController : MonoBehaviour
                     foreach(int i in enemyBehaviourUnConfirmedList) { if (enemyControllers[i].GetNowPosGrid().Equals(goalPos)) { indexOfOtherEnemy = i; break; } } // 目標座標とほかの敵の座標を比較.
                     if(indexOfOtherEnemy != -1 && !EnemyBehaviourToConsistency(indexOfOtherEnemy, ref processingList)) // 目標座標に敵かいる and その敵が結局移動しない.
                     {
+                        enemiesBehavior[n].act = eAct.NoAct;
+                        enemiesBehavior[n].isMove = true;
                         moveVec.len--; // 移動ベクトルの移動量を1減らす.
                         goalPos = nowPos + moveVec.ToPos2D(); // 目標座標を再計算.
                     }
@@ -218,9 +236,9 @@ public class SequenceManagerController : MonoBehaviour
         await UniTask.WhenAll(arrayUniTask);
     }
 
-    private async UniTask MovePlayer(Behavior playerB)
+    private async UniTask MovePlayer(Behavior playerB, ActorController actorToAttack)
     {
-        await playerController.Move(playerB.move, this.GetCancellationTokenOnDestroy(), true); // Player単体でMoveということは，攻撃を兼ねた移動だということ.
+        await playerController.Move(playerB.move, this.GetCancellationTokenOnDestroy(), actorToAttack); // Player単体でMoveということは，攻撃を兼ねた移動だということ.
     }
 
     private async UniTask MoveEnemy(IReadOnlyDictionary<int, Behavior> enemiesB)
@@ -243,7 +261,14 @@ public class SequenceManagerController : MonoBehaviour
     {
         foreach (KeyValuePair<int, Behavior> eB in enemiesB)
         {
-            await enemyControllers[eB.Key].Act(eB.Value.act, this.GetCancellationTokenOnDestroy());
+            if(eB.Value.act == eAct.Attack)
+            {
+                await enemyControllers[eB.Key].Move(eB.Value.move, this.GetCancellationTokenOnDestroy(), playerController);
+            }
+            else
+            {
+                await enemyControllers[eB.Key].Act(eB.Value.act, this.GetCancellationTokenOnDestroy());
+            }
         }
     }
 

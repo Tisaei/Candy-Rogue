@@ -1,0 +1,20 @@
+﻿// プレイヤーが敵にダメージを与えた時のテキスト
+@attack
+<playerName>は<enemyName>に<damage>のダメージを与えた
+やった～!
+
+// プレイヤーが敵からダメージを受けたときのテキスト
+@damaged
+<playerName>は<enemyName>から<damage>のダメージを受けた
+
+// 敵を倒したときのテキスト
+@defeat
+<enemyName>を倒した
+
+// 倒れた時のテキスト
+@defeated
+<enemyName>にやられた
+
+// ゲーム開始時のテキスト
+@gameStart
+げーむ すたーとぉ!

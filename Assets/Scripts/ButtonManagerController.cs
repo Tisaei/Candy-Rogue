@@ -36,13 +36,13 @@ public class ButtonManagerController : MonoBehaviour
             {
                 tilemapController.GnerateArray();
             }
-            else if (Input.GetKey(KeyCode.A)) // 左移動.
+            else if (Input.GetKey(KeyCode.A) && playerController.GetNowHp() != 0) // 左移動.
             {
                 Vec2D toVec;
                 (toVec.dir, toVec.len) = (eDir.Left, eLen.One);
                 sequenceManagerController.DoOneTurn(new Behavior(true, toVec)).Forget();
             }
-            else if (Input.GetKey(KeyCode.W)) // 上移動.
+            else if (Input.GetKey(KeyCode.W) && playerController.GetNowHp() != 0) // 上移動.
             {
                 Vec2D toVec;
                 (toVec.dir, toVec.len) = (eDir.Up, eLen.One);
@@ -54,28 +54,28 @@ public class ButtonManagerController : MonoBehaviour
             }
             else if (Input.GetKey(KeyCode.S))
             {
-                if (!Input.GetKey(KeyCode.LeftShift)) // 下移動.
+                if (!Input.GetKey(KeyCode.LeftShift) && playerController.GetNowHp() != 0) // 下移動.
                 {
                     Vec2D toVec;
                     (toVec.dir, toVec.len) = (eDir.Down, eLen.One);
                     sequenceManagerController.DoOneTurn(new Behavior(true, toVec)).Forget();
                 }
             }
-            else if (Input.GetKey(KeyCode.D)) // 右移動.
+            else if (Input.GetKey(KeyCode.D) && playerController.GetNowHp() != 0) // 右移動.
             {
                 Vec2D toVec;
                 (toVec.dir, toVec.len) = (eDir.Right, eLen.One);
                 sequenceManagerController.DoOneTurn(new Behavior(true, toVec)).Forget();
             }
-            else if (Input.GetKeyDown(KeyCode.Space))
+            else if (Input.GetKeyDown(KeyCode.Space) && playerController.GetNowHp() != 0)
             {
-                sequenceManagerController.DoOneTurn(new Behavior(false, null, eAct.NoMove)).Forget();
+                sequenceManagerController.DoOneTurn(new Behavior(false, null, eAct.NoAct)).Forget();
             }
             else if (Input.GetKeyDown(KeyCode.L)) // ロード.
             {
                 if (Input.GetKey(KeyCode.LeftShift))
                 {
-                    dataController.CustomLoad();
+                    dataController.Load(true);
                 }
                 else
                 {

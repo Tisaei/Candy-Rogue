@@ -20,8 +20,8 @@ public class TilemapController : MonoBehaviour
     [SerializeField]
     private int mapWidth = 25, mapHeight = 25;
 
-    [SerializeField]
-    private int charactorDots = 16;
+    private int charactorDots;
+    public int GetCharactorDots() { return charactorDots; }
 
     private Array2D mapData;
 
@@ -32,6 +32,7 @@ public class TilemapController : MonoBehaviour
         Tilemap.ClearAllTiles();
         TilemapTransform = GetComponent<Transform>();
         playerController = Player.GetComponent<PlayerController>();
+        charactorDots = (int)transform.parent.GetComponent<Grid>().cellSize.x;
     }
 
     // Update is called once per frame

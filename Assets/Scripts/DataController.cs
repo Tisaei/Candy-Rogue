@@ -24,16 +24,16 @@ public class DataController : MonoBehaviour
             public eMapGimmick[] dataX;
         }
 
-        public Pos2D playerPos;
-        public eDir playerDir;
-
-        public enemyData[] enemyDatas;
+        public actorData[] actorDatas;
         [System.Serializable]
-        public struct enemyData
+        public struct actorData
         {
             public int id;
             public Pos2D pos;
             public eDir dir;
+            public int hp;
+            public int atk;
+            public int def;
         }
     }
 
@@ -48,7 +48,7 @@ public class DataController : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        
+
     }
 
     public void Save()
@@ -62,26 +62,20 @@ public class DataController : MonoBehaviour
         for (int y = 0; y < height; y++)
         {
             SaveData.mapDataY[y].dataX = new eMapGimmick[data.GetWidth()];
-            for (int x = 0; x < data.GetWidth(); x++)
-            {
-                SaveData.mapDataY[y].dataX[x] = data.Get(x, height - 1 - y);
-            }
+            for (int x = 0; x < data.GetWidth(); x++) SaveData.mapDataY[y].dataX[x] = data.Get(x, height - 1 - y);
         }
 
-        // プレイヤー情報.
-        var (playerPos, playerDir) = playerController.GetStatus();
-        SaveData.playerPos = playerPos;
-        SaveData.playerDir = playerDir;
-
-        // 敵情報.
+        // アクター情報.
         List<EnemyController> enemyList = sequenceManagerController.GetEnemyControllerList();
-        SaveData.enemyDatas = new Data.enemyData[enemyList.Count];
-        for(int i = 0; i < enemyList.Count; i++)
+        SaveData.actorDatas = new Data.actorData[enemyList.Count + 1];
+        // プレイヤー情報.
+        SaveData.actorDatas[0].id = playerController.actorData.id;
+        (SaveData.actorDatas[0].pos, SaveData.actorDatas[0].dir, SaveData.actorDatas[0].hp, SaveData.actorDatas[0].atk, SaveData.actorDatas[0].def) = playerController.GetStatus();
+        // 敵情報.
+        for (int i = 1; i <= enemyList.Count; i++)
         {
-            SaveData.enemyDatas[i].id = enemyList[i].enemyData.id;
-            var (enemyPos, enemyDir) = enemyList[i].GetStatus();
-            SaveData.enemyDatas[i].pos = enemyPos;
-            SaveData.enemyDatas[i].dir = enemyDir;
+            SaveData.actorDatas[i].id = enemyList[i - 1].actorData.id;
+            (SaveData.actorDatas[i].pos, SaveData.actorDatas[i].dir, SaveData.actorDatas[i].hp, SaveData.actorDatas[i].atk, SaveData.actorDatas[i].def) = enemyList[i - 1].GetStatus();
         }
 
         string jsonstr = JsonUtility.ToJson(SaveData);
@@ -91,9 +85,10 @@ public class DataController : MonoBehaviour
         writer.Close();
         Debug.Log("Saved");
     }
-    public void Load()
+    public void Load(bool isCustom = false)
     {
-        StreamReader reader = new StreamReader(Application.dataPath + "/save.json");
+        StreamReader reader;
+        if (isCustom) reader = new StreamReader(Application.dataPath + "/save-custom.json"); else reader = new StreamReader(Application.dataPath + "/save.json");
         string datastr = reader.ReadToEnd();
         reader.Close();
         Data data = JsonUtility.FromJson<Data>(datastr);
@@ -104,56 +99,26 @@ public class DataController : MonoBehaviour
         for (int y = 0; y < height; y++) { for (int x = 0; x < mapData.GetLength(0); x++) mapData[x, height - 1 - y] = data.mapDataY[y].dataX[x]; }
         tilemapController.LoadArray(mapData);
 
-        // プレイヤー情報.
-        playerController.SetStatus(data.playerPos, data.playerDir);
-
-        // 敵情報.
-        foreach(GameObject e in GameObject.FindGameObjectsWithTag("Enemy")) Destroy(e); // まずEnemyタグのついたオブジェクトをすべて削除.
-        GameObject[] enemies = Resources.LoadAll<GameObject>("Prefabs");
-        int[] enemiesID = Array.ConvertAll(enemies, e => e.GetComponent<EnemyController>().enemyData.id);
-        Debug.Log(string.Join(", ", enemiesID));
-        foreach (Data.enemyData ed in data.enemyDatas)
-        {
-            int index = Array.IndexOf(enemiesID, ed.id);
-            if (index != -1)
-            {
-                GameObject e = Instantiate(enemies[index]);
-                e.GetComponent<EnemyController>().SetStatus(ed.pos, ed.dir);
-                e.transform.SetParent(Canvas.transform);
-            }
-        }
-        sequenceManagerController.isResetEnemyControllerList = true;
-    }
-    public void CustomLoad()
-    {
-        StreamReader reader = new StreamReader(Application.dataPath + "/save-custom.json");
-        string datastr = reader.ReadToEnd();
-        reader.Close();
-        Data data = JsonUtility.FromJson<Data>(datastr);
-
-        // マップ情報.
-        eMapGimmick[,] mapData = new eMapGimmick[data.mapDataY[0].dataX.Length, data.mapDataY.Length];
-        int height = mapData.GetLength(1);
-        for (int y = 0; y < height; y++) { for (int x = 0; x < mapData.GetLength(0); x++) mapData[x, height - 1 - y] = data.mapDataY[y].dataX[x]; }
-        tilemapController.LoadArray(mapData);
-
-        // プレイヤー情報.
-        playerController.SetStatus(data.playerPos, data.playerDir);
-
-        // 敵情報.
+        // アクター情報.
         foreach (GameObject e in GameObject.FindGameObjectsWithTag("Enemy")) Destroy(e); // まずEnemyタグのついたオブジェクトをすべて削除.
-        GameObject[] enemies = Resources.LoadAll<GameObject>("Prefabs");
-        int[] enemiesID = Array.ConvertAll(enemies, e => e.GetComponent<EnemyController>().enemyData.id);
+        GameObject[] enemies = Resources.LoadAll<GameObject>("Prefabs"); // Resourcesフォルダ内のプレファブをすべて取得，プレファブ配列の作成.
+        int[] enemiesID = Array.ConvertAll(enemies, e => e.GetComponent<EnemyController>().actorData.id); // プレファブ配列から敵のID配列を抜き出す.
         Debug.Log(string.Join(", ", enemiesID));
-        foreach (Data.enemyData ed in data.enemyDatas)
+        foreach (Data.actorData ad in data.actorDatas) // セーブデータからひとつづつ.
         {
-            int index = Array.IndexOf(enemiesID, ed.id);
-            Debug.Log("index:" + index.ToString() + ", id:" + ed.id.ToString());
-            if (index != -1)
-            {
-                GameObject e = Instantiate(enemies[index]);
-                e.GetComponent<EnemyController>().SetStatus(ed.pos, ed.dir);
-                e.transform.SetParent(Canvas.transform);
+            if (ad.id == 0)
+            {// プレイヤー情報.
+                playerController.SetStatus(ad.pos, ad.dir, ad.hp, ad.atk, ad.def);
+            }
+            else
+            {//敵情報.
+                int index = Array.IndexOf(enemiesID, ad.id); // ID配列におけるインデックスを取得.(プレファブ配列と同じ)
+                if (index != -1)
+                {
+                    GameObject e = Instantiate(enemies[index]); // プレファブのインスタンス化.
+                    e.GetComponent<EnemyController>().SetStatus(ad.pos, ad.dir, ad.hp, ad.atk, ad.def); // ステータスのセット.
+                    e.transform.SetParent(Canvas.transform); // Canvasオブジェクトの子に指定.
+                }
             }
         }
         sequenceManagerController.isResetEnemyControllerList = true;

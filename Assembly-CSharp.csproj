@@ -64,17 +64,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\ActorController.cs" />
+    <Compile Include="Assets\Scripts\ActorData.cs" />
     <Compile Include="Assets\Scripts\ButtonManagerController.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\CandyRogueBase.cs" />
     <Compile Include="Assets\Scripts\DataController.cs" />
     <Compile Include="Assets\Scripts\EnemyController.cs" />
-    <Compile Include="Assets\Scripts\EnemyData.cs" />
+    <Compile Include="Assets\Scripts\GameOverTextController.cs" />
+    <Compile Include="Assets\Scripts\LogPanelController.cs" />
     <Compile Include="Assets\Scripts\NowLoadingController.cs" />
     <Compile Include="Assets\Scripts\PixelObjectBase.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\SequenceManagerController.cs" />
     <Compile Include="Assets\Scripts\TilemapController.cs" />
+    <Compile Include="Assets\Scripts\UIHPController.cs" />
+    <None Include="Assets\Resources\Log\Candy-Rogue_text.txt" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.21f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>

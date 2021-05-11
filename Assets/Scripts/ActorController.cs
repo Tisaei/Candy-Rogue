@@ -11,11 +11,20 @@ public abstract class ActorController : MonoBehaviour
     protected TilemapController TilemapController;
 
     [SerializeField]
+    public ActorData actorData;
+
+    [SerializeField]
     private int firstPosGridX = 0, firstPosGridY = 0;
 
     private Pos2D nowPosGrid;
     public Pos2D GetNowPosGrid() { return nowPosGrid; }
     private eDir dir;
+    private int nowHp;
+    public int GetNowHp() { return nowHp; }
+    private int nowAtk;
+    public int GetNowAtk() { return nowAtk; }
+    private int nowDef;
+    public int GetNowDef() { return nowDef; }
 
     public override string ToString() { return "Position:(" + nowPosGrid.x.ToString() + "," + nowPosGrid.y.ToString() + ") Direction:" + dir.ToString(); }
 
@@ -46,7 +55,7 @@ public abstract class ActorController : MonoBehaviour
 
     private eTurnState turnState;
 
-    private void Awake() // Instantiateの直後ではまだStartは呼び出されていないので.
+    protected virtual void Awake() // Instantiateの直後ではまだStartは呼び出されていないので.
     {
         TilemapController = GameObject.Find("Tilemap").GetComponent<TilemapController>();
     }
@@ -58,6 +67,7 @@ public abstract class ActorController : MonoBehaviour
         transform.position = tempPosWorld;
         dir = eDir.Up;
         turnState = eTurnState.KEY_INPUT;
+        (nowHp, nowAtk, nowDef) = (actorData.maxHp, actorData.atk, actorData.def);
 
         targetPosWorld = Vector3.zero;
     }
@@ -66,41 +76,22 @@ public abstract class ActorController : MonoBehaviour
 
     }
 
-    public async UniTask Move(Vec2D toVec, CancellationToken cancellation_token, bool isCollideActor = false)
+    public async UniTask Move(Vec2D toVec, CancellationToken cancellation_token, ActorController collideActor = null)
     {
         if (isMoving) return;
         isMoving = true;
         turnState = eTurnState.MOVING;
 
         // 移動するベクトルを受け取り，移動先の座標を計算.
-        int dirX;
-        int dirY;
-        switch (toVec.dir)
-        {
-            case eDir.Left: //左
-                dirX = -1;
-                dirY = 0;
-                break;
-            case eDir.Up:   //上
-                dirX = 0;
-                dirY = 1;
-                break;
-            case eDir.Right://右
-                dirX = 1;
-                dirY = 0;
-                break;
-            default:        //下
-                dirX = 0;
-                dirY = -1;
-                break;
-        }
-        Pos2D amountMoveGrid = (int)toVec.len * new Pos2D(dirX, dirY);
+        var (dirXf, dirYf) = Vec2D.ToUnitPos2D(toVec.dir);
+        Pos2D amountMoveGrid = (int)toVec.len * new Pos2D((int)dirXf, (int)dirYf);
         nowPosGrid += amountMoveGrid;
 
         // 移動の加速度と初速度を計算.
         dir = toVec.dir;
         (targetPosWorld.x, targetPosWorld.y) = (TilemapController.ToWorldX(nowPosGrid.x), TilemapController.ToWorldX(nowPosGrid.y));
-        Vector3 amountMove = targetPosWorld - transform.position;
+        Vector3 vectorToGoal = targetPosWorld - transform.position;
+        Vector3 amountMove = vectorToGoal + (collideActor != null ? new Vector3(dirXf*TilemapController.GetCharactorDots(), dirYf*TilemapController.GetCharactorDots()) : Vector3.zero);
         Vector3 acceleration, moveStartVelocity;
         if (doConstantVMotion)
         {
@@ -116,6 +107,8 @@ public abstract class ActorController : MonoBehaviour
 
         // 移動.
         float moveStartTime = Time.time;
+        Vector3 moveStartPosition = transform.position;
+        bool isBounded = false;
         float elapsedTime;
         Vector3 nowVelocity;
         do
@@ -123,7 +116,22 @@ public abstract class ActorController : MonoBehaviour
             elapsedTime = Time.time - moveStartTime;
             nowVelocity = moveStartVelocity + acceleration * elapsedTime;
             Vector3 meanVelocityThisFrame = nowVelocity - acceleration * Time.deltaTime / 2f;
-            transform.position = Vector3.MoveTowards(transform.position, targetPosWorld, meanVelocityThisFrame.magnitude * Time.deltaTime);
+            if(collideActor != null)
+            {
+                transform.position = transform.position + meanVelocityThisFrame * Time.deltaTime;
+                // もしtransform + charDots / 2 まで進んだらmoveStartVelocityとaccelerationを負にする.
+                if (!isBounded && (transform.position - moveStartPosition).magnitude >= vectorToGoal.magnitude + TilemapController.GetCharactorDots() / 2)
+                {
+                    collideActor.Attacked(nowAtk); // 攻撃!!
+                    moveStartVelocity = -moveStartVelocity;
+                    acceleration = -acceleration;
+                    isBounded = true;
+                }
+            }
+            else
+            {
+                transform.position = Vector3.MoveTowards(transform.position, targetPosWorld, meanVelocityThisFrame.magnitude * Time.deltaTime);
+            }
             await UniTask.Yield(PlayerLoopTiming.Update, cancellation_token);
         } while (elapsedTime < moveTime);
         transform.position = targetPosWorld;
@@ -161,17 +169,33 @@ public abstract class ActorController : MonoBehaviour
         isActing = false;
     }
 
-    public (Pos2D actorPos, eDir actorDir) GetStatus()
+    public virtual void Attacked(int atk)
     {
-        return (nowPosGrid, dir);
+        int damage = (int)Math.Round(atk * Math.Pow(0.9375, nowDef), MidpointRounding.AwayFromZero); // ダメージ計算式.
+        if(nowHp - damage > 0)
+        {
+            nowHp -= damage;
+        }
+        else
+        {
+            nowHp = 0;
+            gameObject.GetComponent<Renderer>().enabled = false;
+        }
     }
-    public void SetStatus(Pos2D actorPos, eDir actorDir)
+
+    public (Pos2D actorPos, eDir actorDir, int hp, int atk, int def) GetStatus()
+    {
+        return (nowPosGrid, dir, nowHp, nowAtk, nowDef);
+    }
+    public virtual void SetStatus(Pos2D actorPos, eDir actorDir, int hp, int atk, int def)
     {
         (nowPosGrid.x, nowPosGrid.y) = (actorPos.x, actorPos.y);
         Vector3 nowPosWorld = Vector3.zero;
         (nowPosWorld.x, nowPosWorld.y) = (TilemapController.ToWorldX(actorPos.x), TilemapController.ToWorldY(actorPos.y));
         transform.position = nowPosWorld;
         dir = actorDir;
+        nowHp = hp;
+        (nowHp, nowAtk, nowDef) = (hp, atk, def);
     }
 
     public eTurnState GetEAct()

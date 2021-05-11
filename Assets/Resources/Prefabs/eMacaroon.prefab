@@ -113,11 +113,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7653ebb60c8a5f4e95992f25bcffd3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Tilemap: {fileID: 0}
+  actorData: {fileID: 11400000, guid: 0be17b522c7d948408cc917e88e9082f, type: 2}
   firstPosGridX: 10
   firstPosGridY: 15
   doConstantVMotion: 0
   moveTime: 0.25
   isMoving: 0
   isActing: 0
-  enemyData: {fileID: 11400000, guid: 0be17b522c7d948408cc917e88e9082f, type: 2}

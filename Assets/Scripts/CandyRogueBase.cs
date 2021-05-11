@@ -86,14 +86,15 @@ namespace CandyRogueBase
 
     public enum eAct
     {
-        NoMove
+        NoAct,
+        Attack
     }
     public struct Behavior
     {
-        public bool isMove;
+        public bool isMove; // trueならば移動だけ(攻撃もしない).
         public Vec2D move;
         public eAct act;
-        public Behavior(bool isMove, Vec2D? move = null, eAct act = eAct.NoMove) //null許容型: intや構造体などの値型はnullを入れられないが，?をつけることでnullを入れられるようになる.
+        public Behavior(bool isMove, Vec2D? move = null, eAct act = eAct.NoAct) //null許容型: intや構造体などの値型はnullを入れられないが，?をつけることでnullを入れられるようになる.
         {
             this.isMove = isMove;
             this.move = move ?? new Vec2D(eDir.Up, eLen.One); //null非許容型にnull許容型を代入するときは，??をつけて後ろにnullだった時に代入するものを書く.
